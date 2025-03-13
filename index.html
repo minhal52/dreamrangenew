@@ -346,25 +346,12 @@
     <!-- <h2>Book Your Ticket</h2> -->
     <div class="form-container">
         <form id="ticketForm">
-            <!-- Name Field -->
             <input type="text" id="name" placeholder="Enter Your Name" required>
-            
-            <!-- Phone Number Field -->
             <input type="tel" id="contact" placeholder="Enter Contact Number" required maxlength="10">
-            
-            <!-- Email Field -->
             <input type="email" id="email" placeholder="Enter Email ID" required>
-            
-            <!-- Number of Tickets Field -->
             <input type="number" id="tickets" placeholder="Number of Tickets" required>
-            
-            <!-- Referral Code Field -->
             <input type="text" id="referral" placeholder="Enter Your Referral Details (Optional)">
-            
-            <!-- Address Field (Textarea) -->
             <textarea id="address" placeholder="Enter Your Address" required></textarea>
-            
-            <!-- Ticket Now Button -->
             <button type="button" id="ticketButton" onclick="submitForm()" class="ticketnow" disabled>Ticket Now</button>
         </form>
         
@@ -460,48 +447,34 @@ function createSparkles() {
     // Run the sparkle creation function
     createSparkles();
 // /
-
 document.getElementById("ticketForm").addEventListener("input", validateForm);
 
 function validateForm() {
-    const name = document.getElementById("name").value.trim();
-    const contact = document.getElementById("contact").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const tickets = document.getElementById("tickets").value.trim();
-    const address = document.getElementById("address").value.trim();
-    
-    // Enable button only if required fields are filled
-    document.getElementById("ticketButton").disabled = !(name && contact && email && tickets && address);
+    const requiredFields = ["name", "contact", "email", "tickets", "address"];
+    const allFilled = requiredFields.every(id => document.getElementById(id).value.trim() !== "");
+    document.getElementById("ticketButton").disabled = !allFilled;
 }
 
 function submitForm() {
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxkBiqNhN3UKp4O6HUC6wWmo664XBr_gqGaiJiFeaKLme_TtQJ0_A5TLvnH6FULIdg/exec"; // Google Apps Script URL
-    const phoneNumber = "918277328080"; // Corrected WhatsApp number format (without "+", use country code)
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxkBiqNhN3UKp4O6HUC6wWmo664XBr_gqGaiJiFeaKLme_TtQJ0_A5TLvnH6FULIdg/exec"; 
+    const phoneNumber = "918277328080"; 
 
-    // Collect Form Data
-    const formData = new FormData();
-    const name = document.getElementById("name").value;
-    const contact = document.getElementById("contact").value;
-    const email = document.getElementById("email").value;
-    const tickets = document.getElementById("tickets").value;
-    const referral = document.getElementById("referral").value || "N/A"; // Default if empty
-    const address = document.getElementById("address").value;
+    const formData = new FormData(document.getElementById("ticketForm"));
 
-    // Append to FormData (for Google Sheets)
-    formData.append("name", name);
-    formData.append("contact", contact);
-    formData.append("email", email);
-    formData.append("tickets", tickets);
-    formData.append("referral", referral);
-    formData.append("address", address);
+    // Send data to Google Sheets first
+    fetch(scriptURL, { method: "POST", body: formData, mode: "no-cors" })
+        .then(() => {
+            console.log("Data sent to Google Sheets.");
 
-    // Send Data to Google Sheets (Background Process)
-    fetch(scriptURL, { method: "POST", body: formData })
-        .then(response => console.log("Data saved to Google Sheets"))
-        .catch(error => console.error("Error!", error.message));
+            // After saving, open WhatsApp
+            const name = document.getElementById("name").value;
+            const contact = document.getElementById("contact").value;
+            const email = document.getElementById("email").value;
+            const tickets = document.getElementById("tickets").value;
+            const referral = document.getElementById("referral").value || "N/A";
+            const address = document.getElementById("address").value;
 
-    // Open WhatsApp with Prefilled Message (Corrected)
-    const message = `Hello, I would like to book a ticket.
+            const message = `Hello, I would like to book a ticket.
 👤 Name: ${name}
 📞 Contact: ${contact}
 📧 Email: ${email}
@@ -509,12 +482,14 @@ function submitForm() {
 🔖 Referral: ${referral}
 🏠 Address: ${address}`;
 
-    const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappURL, "_blank");
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappURL, "_blank");
 
-    // Reset the Form
-    document.getElementById("ticketForm").reset();
-    document.getElementById("ticketButton").disabled = true; // Disable button after submission
+            // Reset the form after submission
+            document.getElementById("ticketForm").reset();
+            document.getElementById("ticketButton").disabled = true;
+        })
+        .catch(error => console.error("Error saving data:", error));
 }
 
 </script>
