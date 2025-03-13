@@ -26,6 +26,8 @@ function toggleMenu() {
 document.querySelector(".nav-links").classList.toggle("active");
 }
 
+
+// whatsp
 function validateForm() {
     let name = document.getElementById("name").value.trim();
     let contact = document.getElementById("contact").value.trim();
@@ -34,15 +36,10 @@ function validateForm() {
     let email = document.getElementById("email").value.trim();
     let ticketButton = document.getElementById("ticketButton");
 
-    // Regular expressions for validation
     let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     let phonePattern = /^[0-9]{10}$/;
 
-    if (name && phonePattern.test(contact) && tickets && address && emailPattern.test(email)) {
-        ticketButton.disabled = false;
-    } else {
-        ticketButton.disabled = true;
-    }
+    ticketButton.disabled = !(name && phonePattern.test(contact) && tickets && address && emailPattern.test(email));
 }
 
 function sendToWhatsApp() {
@@ -60,8 +57,23 @@ function sendToWhatsApp() {
         return;
     }
 
-    let message = `Hello, I want to book tickets.%0A%0A*Name:* ${name}%0A*Contact:* ${contact}%0A*Email:* ${email}%0A*Tickets:* ${tickets}%0A*Address:* ${address}`;
-    let whatsappURL = `https://wa.me/918277328080?text=${message}`; // Corrected URL encoding
+    let scriptURL = "https://script.google.com/macros/s/AKfycbxwCK7VsFUf3bA_kRB--Rf97ToEsWO5NyC4bU631DrvsCZjfZ-pIYwU1HR1tLt5d6JPJw/exec";
+    let formData = new FormData();
+    formData.append("name", name);
+    formData.append("contact", contact);
+    formData.append("email", email);
+    formData.append("tickets", tickets);
+    formData.append("address", address);
 
-    window.open(whatsappURL, "_blank");
+    fetch(scriptURL, { method: "POST", body: formData })
+        .then(response => response.text())
+        .then(() => {
+            let message = `Hello, I want to book tickets.%0A%0A*Name:* ${name}%0A*Contact:* ${contact}%0A*Email:* ${email}%0A*Tickets:* ${tickets}%0A*Address:* ${address}`;
+            let whatsappURL = `https://wa.me/918277328080?text=${message}`;
+            window.open(whatsappURL, "_blank");
+        })
+        .catch(error => {
+            alert("There was an error submitting the form. Please try again.");
+            console.error("Error:", error);
+        });
 }
