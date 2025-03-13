@@ -428,6 +428,61 @@ function scrollToTicketSection() {
     // Scroll to the section with the ID "ticket-section"
     document.getElementById("ticket-section").scrollIntoView({ behavior: "smooth" });
 }
+// whatsapp form 
+
+function validateForm() {
+    let name = document.getElementById("name").value.trim();
+    let contact = document.getElementById("contact").value.trim();
+    let tickets = document.getElementById("tickets").value.trim();
+    let address = document.getElementById("address").value.trim();
+    let email = document.getElementById("email").value.trim();
+
+    let ticketButton = document.getElementById("ticketButton");
+
+    let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    let phonePattern = /^[0-9]{10}$/;
+
+    ticketButton.disabled = !(name && phonePattern.test(contact) && tickets && address && emailPattern.test(email));
+}
+
+function sendToWhatsApp() {
+    let name = document.getElementById("name").value.trim();
+    let contact = document.getElementById("contact").value.trim();
+    let tickets = document.getElementById("tickets").value.trim();
+    let address = document.getElementById("address").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let referral = document.getElementById("referral").value.trim(); // Referral Code
+
+    let phonePattern = /^[0-9]{10}$/;
+    let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!name || !phonePattern.test(contact) || !tickets || !address || !emailPattern.test(email)) {
+        alert("Please fill all fields correctly.");
+        return;
+    }
+
+    // Prefilled WhatsApp message
+    let message = `Hello, I want to book tickets.%0A%0A*Name:* ${name}%0A*Contact:* ${contact}%0A*Email:* ${email}%0A*Tickets:* ${tickets}%0A*Address:* ${address}%0A*Referral Code:* ${referral}`;
+    let whatsappURL = `https://wa.me/918277328080?text=${message}`;
+
+    // Open WhatsApp immediately
+    window.open(whatsappURL, "_blank");
+
+    // Send data to Google Sheets in the background
+    let scriptURL = "https://script.google.com/macros/s/AKfycbwCwiv4o7EeHqdjZHPBQ9qJq5z_evE04I0nDLd8xzIP9yWB46s3SwRzIe75uXS63NNimg/exec";
+    let formData = new FormData();
+    formData.append("name", name);
+    formData.append("contact", contact);
+    formData.append("email", email);
+    formData.append("tickets", tickets);
+    formData.append("address", address);
+    formData.append("referral", referral); // Include Referral Code
+
+    // Submit data silently (without user knowing)
+    fetch(scriptURL, { method: "POST", body: formData })
+        .catch(error => console.error("Google Sheet Error:", error));
+}
+
 
 // sparkle effect
 // Create a specified number of sparkle items dynamically
@@ -457,59 +512,6 @@ function createSparkles() {
 
     // Run the sparkle creation function
     createSparkles();
-
-    
-// whatsp
-function validateForm() {
-    let name = document.getElementById("name").value.trim();
-    let contact = document.getElementById("contact").value.trim();
-    let tickets = document.getElementById("tickets").value.trim();
-    let address = document.getElementById("address").value.trim();
-    let email = document.getElementById("email").value.trim();
-    let ticketButton = document.getElementById("ticketButton");
-
-    let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    let phonePattern = /^[0-9]{10}$/;
-
-    ticketButton.disabled = !(name && phonePattern.test(contact) && tickets && address && emailPattern.test(email));
-}
-
-function sendToWhatsApp() {
-    let name = document.getElementById("name").value.trim();
-    let contact = document.getElementById("contact").value.trim();
-    let tickets = document.getElementById("tickets").value.trim();
-    let address = document.getElementById("address").value.trim();
-    let email = document.getElementById("email").value.trim();
-
-    let phonePattern = /^[0-9]{10}$/;
-    let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (!name || !phonePattern.test(contact) || !tickets || !address || !emailPattern.test(email)) {
-        alert("Please fill all fields correctly.");
-        return;
-    }
-
-    let scriptURL = "https://script.google.com/macros/s/AKfycbxwCK7VsFUf3bA_kRB--Rf97ToEsWO5NyC4bU631DrvsCZjfZ-pIYwU1HR1tLt5d6JPJw/exec";
-    let formData = new FormData();
-    formData.append("name", name);
-    formData.append("contact", contact);
-    formData.append("email", email);
-    formData.append("tickets", tickets);
-    formData.append("address", address);
-
-    fetch(scriptURL, { method: "POST", body: formData })
-        .then(response => response.text())
-        .then(() => {
-            let message = `Hello, I want to book tickets.%0A%0A*Name:* ${name}%0A*Contact:* ${contact}%0A*Email:* ${email}%0A*Tickets:* ${tickets}%0A*Address:* ${address}`;
-            let whatsappURL = `https://wa.me/918277328080?text=${message}`;
-            window.open(whatsappURL, "_blank");
-        })
-        .catch(error => {
-            alert("There was an error submitting the form. Please try again.");
-            console.error("Error:", error);
-        });
-}
-
 </script>
 
 </body>
